@@ -18,8 +18,6 @@ def main():
             .str.strip()  # Strip whitespace
         )
 
-    os.mkdir('data/out')
-
     movies = pd.read_csv(
         'data/raw/movie.metadata.tsv',
         converters={'languages': normalize, 'countries': normalize, 'genres': normalize},
@@ -39,6 +37,7 @@ def main():
     ).assign(summary=lambda x: clean_summary(x.summary))
 
     df = movies.merge(summaries, on='id').sort_values('date').reset_index(drop=True)
+    os.mkdir('data/out')
     df.to_pickle('data/out/data.pkl')
     ProfileReport(df).to_file('data/out/report.html')
 
