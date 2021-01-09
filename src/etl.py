@@ -37,7 +37,7 @@ def main():
     ).assign(summary=lambda x: clean_summary(x.summary))
 
     df = movies.merge(summaries, on='id').sort_values('date').reset_index(drop=True)
-    os.mkdir('data/out')
+    os.makedirs('data/out', exist_ok=True)
     df.to_pickle('data/out/data.pkl')
     ProfileReport(df).to_file('data/out/report.html')
 
