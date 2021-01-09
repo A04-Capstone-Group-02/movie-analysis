@@ -4,8 +4,6 @@ from pandas_profiling import ProfileReport
 
 
 def main():
-    os.system('src/etl.sh')
-
     def normalize(x):
         dictionary = eval(x)
         if dictionary:
@@ -19,6 +17,8 @@ def main():
             .str.replace('\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
         )
+
+    os.mkdir('data/out')
 
     movies = pd.read_csv(
         'data/raw/movie.metadata.tsv',
