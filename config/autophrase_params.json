@@ -1,9 +1,9 @@
 {
     "HIGHLIGHT_MULTI": 0.8,
     "HIGHLIGHT_SINGLE": 0.8,
-    "MIN_SUP": 30,
-    "MODEL": "../model",
-    "RAW_TRAIN": "../data/raw/summaries.txt",
-    "TEXT_TO_SEG": "../data/raw/summaries.txt",
+    "MIN_SUP": 20,
+    "MODEL": "../model/autophrase",
+    "RAW_TRAIN": "../data/out/summaries.txt",
+    "TEXT_TO_SEG": "../data/out/summaries.txt",
     "THREAD": 1
 }

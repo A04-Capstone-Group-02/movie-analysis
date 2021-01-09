@@ -11,7 +11,8 @@ def main(targets):
     if 'etl' in targets:
         etl.main()
 
-    if 'autophrase' in targets:
+    if 'train' in targets:
+        # Run AutoPhrase
         os.system(f'cd AutoPhrase && {autophrase_params} ./auto_phrase.sh && {autophrase_params} ./phrasal_segmentation.sh')
 
     if 'test' in targets:
