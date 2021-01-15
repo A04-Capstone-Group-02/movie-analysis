@@ -3,7 +3,12 @@ import pandas as pd
 from pandas_profiling import ProfileReport
 
 
-def main():
+def get_data(autophrase_params):
+    # Make data directories
+    os.makedirs('data/temp', exist_ok=True)
+    os.makedirs('data/out', exist_ok=True)
+
+    # Read in raw data
     def normalize(x):
         dictionary = eval(x)
         if dictionary:
@@ -12,9 +17,9 @@ def main():
     def clean_summary(summary):
         return (
             summary
-            .str.replace('{{.*?}}', '')  # Remove Wikipedia tags
-            .str.replace('http\S+', '')  # Remove URLs
-            .str.replace('\s+', ' ')  # Combine whitespace
+            .str.replace(r'{{.*?}}', '')  # Remove Wikipedia tags
+            .str.replace(r'http\S+', '')  # Remove URLs
+            .str.replace(r'\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
         )
 
@@ -36,14 +41,25 @@ def main():
         names='id summary'.split()
     ).assign(summary=lambda x: clean_summary(x.summary))
 
+    # Combine movie metadata and plot summaries into df
     df = movies.merge(summaries, on='id').sort_values('date').reset_index(drop=True)
-    os.makedirs('data/out', exist_ok=True)
-    df.to_pickle('data/out/data.pkl')
-    ProfileReport(df).to_file('data/out/report.html')
 
-    with open(f'data/out/summaries.txt', 'w') as f:
+    # Run AutoPhrase on plot summaries
+    with open(f'data/temp/summaries.txt', 'w') as f:
         f.write('\n'.join(df.summary))
 
+    autophrase_params = ' '.join([f'{param}={value}' for param, value in autophrase_params.items()])
+    os.system(f'cd AutoPhrase && {autophrase_params} ./auto_phrase.sh && {autophrase_params} ./phrasal_segmentation.sh')
 
-if __name__ == '__main__':
-    main()
+    # Add phrases to df
+    df['phrases'] = pd.read_csv(
+        'model/autophrase/segmentation.txt',
+        delimiter=r'\n',
+        engine='python',
+        header=None,
+        squeeze=True
+    ).str.findall(r'<phrase>(.+?)</phrase>').values
+
+    # Export df
+    df.to_pickle('data/out/data.pkl')
+    ProfileReport(df).to_file('data/out/report.html')
