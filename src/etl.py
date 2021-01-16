@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import pandas as pd
 from pandas_profiling import ProfileReport
@@ -12,7 +13,7 @@ def get_data(autophrase_params):
     def normalize(x):
         dictionary = eval(x)
         if dictionary:
-            return list(dictionary.values())
+            return sorted(list(dictionary.values()))
 
     def clean_summary(summary):
         return (
@@ -59,7 +60,7 @@ def get_data(autophrase_params):
         engine='python',
         header=None,
         squeeze=True
-    ).str.findall(r'<phrase>(.+?)</phrase>').apply(set).apply(list).values
+    ).str.findall(r'<phrase>(.+?)</phrase>').apply(np.unique).apply(list).values
 
     # Export df
     df.to_pickle('data/out/data.pkl')

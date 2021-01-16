@@ -1,6 +1,4 @@
 {
-    "HIGHLIGHT_MULTI": 0.8,
-    "HIGHLIGHT_SINGLE": 0.8,
     "MIN_SUP": 20,
     "MODEL": "../model/autophrase",
     "RAW_TRAIN": "../data/temp/summaries.txt",
