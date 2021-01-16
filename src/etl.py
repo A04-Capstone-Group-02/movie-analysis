@@ -59,7 +59,7 @@ def get_data(autophrase_params):
         engine='python',
         header=None,
         squeeze=True
-    ).str.findall(r'<phrase>(.+?)</phrase>').values
+    ).str.findall(r'<phrase>(.+?)</phrase>').apply(set).apply(list).values
 
     # Export df
     df.to_pickle('data/out/data.pkl')
