@@ -21,6 +21,7 @@ def get_data(autophrase_params):
             .str.replace(r'http\S+', '')  # Remove URLs
             .str.replace(r'\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
+            .replace('', pd.NA)  # Replace empty strings with NA
         )
 
     movies = pd.read_csv(
@@ -39,7 +40,7 @@ def get_data(autophrase_params):
         header=None,
         index_col='id',
         names='id summary'.split()
-    ).assign(summary=lambda x: clean_summary(x.summary))
+    ).assign(summary=lambda x: clean_summary(x.summary)).dropna()
 
     # Combine movie metadata and plot summaries into df
     df = movies.merge(summaries, on='id').sort_values('date').reset_index(drop=True)
