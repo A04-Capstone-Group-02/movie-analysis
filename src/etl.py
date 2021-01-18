@@ -2,6 +2,7 @@ import numpy as np
 import os
 import pandas as pd
 from pandas_profiling import ProfileReport
+import re
 
 
 def get_data(autophrase_params):
@@ -10,10 +11,56 @@ def get_data(autophrase_params):
     os.makedirs('data/out', exist_ok=True)
 
     # Read in raw data
-    def normalize(x):
+    def normalize_languages(x):
+        def is_utf8(value):
+            try:
+                value.encode()
+            except UnicodeEncodeError:
+                return False
+            return True
+
+        def sub(value):
+            return re.sub(r' [Ll]anguages?', '', value)
+
         dictionary = eval(x)
         if dictionary:
-            return sorted(list(dictionary.values()))
+            return sorted(np.unique([sub(value) for value in dictionary.values() if is_utf8(value)]))
+
+    def normalize_countries(x):
+        dictionary = eval(x)
+        if dictionary:
+            return sorted(dictionary.values())
+
+    def normalize_genres(x):
+        def sub(value):
+            # Replace with a more common genre name
+            if value == 'Animal Picture':
+                return 'Animals'
+            if value in ['Biographical film', 'Biopic [feature]']:
+                return 'Biography'
+            if value == 'Buddy Picture':
+                return 'Buddy'
+            if value == 'Comdedy':
+                return 'Comedy'
+            if value == 'Coming of age':
+                return 'Coming-of-age'
+            if value == 'Detective fiction':
+                return 'Detective'
+            if value == 'Education':
+                return 'Educational'
+            if value in ['Gay Interest', 'Gay Themed']:
+                return 'Gay'
+            if value == 'Gross out':
+                return 'Gross-out'
+            if value == 'Pornography':
+                return 'Pornographic'
+            if value == 'Social issues':
+                return 'Social problem'
+            return re.sub(' [Ff]ilms?| [Mm]ovies?', '', value)
+
+        dictionary = eval(x)
+        if dictionary:
+            return sorted(np.unique([sub(value) for value in dictionary.values()]))
 
     def clean_summary(summary):
         return (
@@ -27,7 +74,7 @@ def get_data(autophrase_params):
 
     movies = pd.read_csv(
         'data/raw/movie.metadata.tsv',
-        converters={'languages': normalize, 'countries': normalize, 'genres': normalize},
+        converters={'languages': normalize_languages, 'countries': normalize_countries, 'genres': normalize_genres},
         delimiter='\t',
         header=None,
         index_col='id',
@@ -47,7 +94,7 @@ def get_data(autophrase_params):
     df = movies.merge(summaries, on='id').sort_values('date').reset_index(drop=True)
 
     # Run AutoPhrase on plot summaries
-    with open(f'data/temp/summaries.txt', 'w') as f:
+    with open('data/temp/summaries.txt', 'w') as f:
         f.write('\n'.join(df.summary))
 
     autophrase_params = ' '.join([f'{param}={value}' for param, value in autophrase_params.items()])
