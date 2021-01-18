@@ -107,7 +107,7 @@ def get_data(autophrase_params):
         engine='python',
         header=None,
         squeeze=True
-    ).str.findall(r'<phrase>(.+?)</phrase>').apply(np.unique).apply(list).values
+    ).str.findall(r'<phrase>(.+?)</phrase>').apply(lambda x: [s.lower() for s in x]).apply(np.unique).apply(list).values
 
     # Export df
     df.to_pickle('data/out/data.pkl')
