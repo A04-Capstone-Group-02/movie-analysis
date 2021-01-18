@@ -42,6 +42,10 @@ def get_data(autophrase_params):
                 return 'Buddy'
             if value == 'Comdedy':
                 return 'Comedy'
+            if value == 'Coming of age':
+                return 'Coming-of-age'
+            if value == 'Detective fiction':
+                return 'Detective'
             if value == 'Education':
                 return 'Educational'
             if value in ['Gay Interest', 'Gay Themed']:
@@ -53,7 +57,7 @@ def get_data(autophrase_params):
             if value == 'Social issues':
                 return 'Social problem'
 
-            return re.sub(' [Ff]ilms?| [Mm]ovies', '', value)
+            return re.sub(' [Ff]ilms?| [Mm]ovies?', '', value)
 
         dictionary = eval(x)
         if dictionary:
