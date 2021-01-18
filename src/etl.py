@@ -22,14 +22,10 @@ def get_data(autophrase_params):
         def sub(value):
             return re.sub(r' [Ll]anguages?', '', value)
 
-        dictionary = eval(x)
-        if dictionary:
-            return sorted(np.unique([sub(value) for value in dictionary.values() if is_utf8(value)]))
+        return sorted(np.unique([sub(value) for value in eval(x).values() if is_utf8(value)]))
 
     def normalize_countries(x):
-        dictionary = eval(x)
-        if dictionary:
-            return sorted(dictionary.values())
+        return sorted(eval(x).values())
 
     def normalize_genres(x):
         def sub(value):
@@ -58,9 +54,7 @@ def get_data(autophrase_params):
                 return 'Social problem'
             return re.sub(' [Ff]ilms?| [Mm]ovies?', '', value)
 
-        dictionary = eval(x)
-        if dictionary:
-            return sorted(np.unique([sub(value) for value in dictionary.values()]))
+        return sorted(np.unique([sub(value) for value in eval(x).values()]))
 
     def clean_summary(summary):
         return (
