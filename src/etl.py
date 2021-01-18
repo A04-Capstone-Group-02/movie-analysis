@@ -56,7 +56,6 @@ def get_data(autophrase_params):
                 return 'Pornographic'
             if value == 'Social issues':
                 return 'Social problem'
-
             return re.sub(' [Ff]ilms?| [Mm]ovies?', '', value)
 
         dictionary = eval(x)
