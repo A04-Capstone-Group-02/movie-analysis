@@ -22,7 +22,7 @@ def get_data(autophrase_params):
         def sub(value):
             return re.sub(r' [Ll]anguages?', '', value)
 
-        return sorted(np.unique([sub(value) for value in eval(x).values() if is_utf8(value)]))
+        return list(np.unique([sub(value) for value in eval(x).values() if is_utf8(value)]))
 
     def normalize_countries(x):
         return sorted(eval(x).values())
@@ -54,7 +54,7 @@ def get_data(autophrase_params):
                 return 'Social problem'
             return re.sub(' [Ff]ilms?| [Mm]ovies?', '', value)
 
-        return sorted(np.unique([sub(value) for value in eval(x).values()]))
+        return list(np.unique([sub(value) for value in eval(x).values()]))
 
     def clean_summary(summary):
         return (
@@ -64,6 +64,24 @@ def get_data(autophrase_params):
             .str.replace(r'\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
             .replace('', pd.NA)  # Replace empty strings with NA
+        )
+
+    def extract_highlighted_phrases(segmentation):
+        def is_false_positive(s):
+            s = s.lower()
+            if '|' in s:  # Leftover Wikipedia tags
+                return True
+            if 'featuring' in s:  # E.g. "featuring mithun chakraborty"
+                return True
+            return False
+
+        return (
+            segmentation
+            .str.findall(r'<phrase>(.+?)</phrase>')
+            .apply(lambda x: [s.lower() for s in x if not is_false_positive(s)])
+            .apply(np.unique)
+            .apply(list)
+            .values
         )
 
     movies = pd.read_csv(
@@ -95,13 +113,13 @@ def get_data(autophrase_params):
     os.system(f'cd AutoPhrase && {autophrase_params} ./auto_phrase.sh && {autophrase_params} ./phrasal_segmentation.sh')
 
     # Add phrases to df
-    df['phrases'] = pd.read_csv(
+    df['phrases'] = extract_highlighted_phrases(pd.read_csv(
         'model/autophrase/segmentation.txt',
         delimiter=r'\n',
         engine='python',
         header=None,
         squeeze=True
-    ).str.findall(r'<phrase>(.+?)</phrase>').apply(lambda x: [s.lower() for s in x]).apply(np.unique).apply(list).values
+    ))
 
     # Export df
     df.to_pickle('data/out/data.pkl')
