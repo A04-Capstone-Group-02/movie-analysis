@@ -67,26 +67,6 @@ def get_data(autophrase_params):
             .replace('', pd.NA)  # Replace empty strings with NA
         )
 
-    def extract_highlighted_phrases(segmentation):
-        def is_false_positive(s):
-            s = s.lower()
-            if '|' in s:  # Leftover Wikipedia tags
-                return True
-            if 'featuring' in s:  # E.g. "featuring mithun chakraborty"
-                return True
-            if 'starring' in s:  # E.g. "starring mithun chakraborty"
-                return True
-            return False
-
-        return (
-            segmentation
-            .str.findall(r'<phrase>(.+?)</phrase>')
-            .apply(lambda x: [s.lower() for s in x if not is_false_positive(s)])
-            .apply(np.unique)
-            .apply(list)
-            .values
-        )
-
     movies = pd.read_csv(
         'data/raw/movie.metadata.tsv',
         converters={'languages': normalize_languages, 'countries': normalize_countries, 'genres': normalize_genres},
@@ -116,6 +96,28 @@ def get_data(autophrase_params):
     os.system(f'cd AutoPhrase && {autophrase_params} ./auto_phrase.sh && {autophrase_params} ./phrasal_segmentation.sh')
 
     # Add phrases to df
+    def extract_highlighted_phrases(segmentation):
+        def is_false_positive(s):
+            s = s.lower()
+            if len(s) == 1:  # Only 1 character
+                return True
+            if '|' in s:  # Leftover Wikipedia tags
+                return True
+            if 'featuring' in s:  # E.g. "featuring mithun chakraborty"
+                return True
+            if 'starring' in s:  # E.g. "starring mithun chakraborty"
+                return True
+            return False
+
+        return (
+            segmentation
+            .str.findall(r'<phrase>(.+?)</phrase>')
+            .apply(lambda x: [s.lower() for s in x if not is_false_positive(s)])
+            .apply(np.unique)
+            .apply(list)
+            .values
+        )
+
     df['phrases'] = extract_highlighted_phrases(pd.read_csv(
         'model/autophrase/segmentation.txt',
         delimiter=r'\n',
