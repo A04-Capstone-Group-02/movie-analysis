@@ -61,6 +61,7 @@ def get_data(autophrase_params):
             summary
             .str.replace(r'{{.*?}}', '')  # Remove Wikipedia tags
             .str.replace(r'http\S+', '')  # Remove URLs
+            .str.replace(r'\S+.com', '')  # Remove URLs
             .str.replace(r'\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
             .replace('', pd.NA)  # Replace empty strings with NA
@@ -72,6 +73,8 @@ def get_data(autophrase_params):
             if '|' in s:  # Leftover Wikipedia tags
                 return True
             if 'featuring' in s:  # E.g. "featuring mithun chakraborty"
+                return True
+            if 'starring' in s:  # E.g. "starring mithun chakraborty"
                 return True
             return False
 
