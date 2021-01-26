@@ -61,7 +61,6 @@ def get_data(autophrase_params):
             summary
             .str.replace(r'{{.*?}}', '')  # Remove Wikipedia tags
             .str.replace(r'http\S+', '')  # Remove URLs
-            .str.replace(r'\S+\.com', '')  # Remove URLs
             .str.replace(r'\s+', ' ')  # Combine whitespace
             .str.strip()  # Strip whitespace
             .replace('', pd.NA)  # Replace empty strings with NA
@@ -100,6 +99,8 @@ def get_data(autophrase_params):
         def is_false_positive(s):
             s = s.lower()
             if len(s) == 1:  # Only 1 character
+                return True
+            if s in ['imdb.com']:
                 return True
             if '|' in s:  # Leftover Wikipedia tags
                 return True
