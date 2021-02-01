@@ -1,5 +1,6 @@
 {
-  "out_dir": "data/figures",
-  "year_start": 1928,
-  "year_end": 2012
+  "data_in": "data/out/data.pkl",
+  "data_out": "data/figures",
+  "year_start": 1920,
+  "year_end": 2013
 }
