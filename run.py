@@ -5,6 +5,7 @@ import sys
 
 
 def main(targets):
+    etl_params = json.load(open('config/etl.json'))
     autophrase_params = json.load(open('config/autophrase.json'))
     eda_params = json.load(open('config/eda.json'))
 
@@ -12,7 +13,7 @@ def main(targets):
         download_dataset()
 
     if 'data' in targets:
-        get_data(autophrase_params)
+        get_data(autophrase_params, **etl_params)
 
     if 'eda' in targets:
         generate_figures(**eda_params)
