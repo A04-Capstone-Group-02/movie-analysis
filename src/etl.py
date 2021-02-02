@@ -122,7 +122,7 @@ def get_data(autophrase_params):
             s = s.lower()
             if len(s) == 1:  # Only 1 character
                 return True
-            if s in ['imdb.com']:
+            if s in ['falls', 'imdb.com']:
                 return True
             if '|' in s:  # Leftover Wikipedia tags
                 return True
