@@ -1,6 +1,6 @@
 from collections import Counter
 import matplotlib.pyplot as plt
-import numpy as np
+from math import ceil
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -25,16 +25,15 @@ def top_phrases_by_year(df, year_start, year_end, phrase_count_threshold):
 
     # Plot the top phrases by year, ranked by tf-idf
     ncols = 5
-    years_padded = np.pad(phrase_tfidfs_by_year.index, (year_start % ncols, ncols - (year_end + 1) % ncols))
-    nrows = len(years_padded) // ncols
-    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(13, nrows * 1.5), constrained_layout=True)
-    for year, ax in zip(years_padded, axes.flatten()):
-        if year:
-            phrase_tfidfs_by_year.loc[year].nlargest(10)[::-1].plot.barh(ax=ax)
-            ax.set(title=year, xlabel='tf-idf')
-            ax.tick_params(bottom=False, labelbottom=False)
-        else:
-            ax.axis('off')
+    nrows = ceil(len(phrase_tfidfs_by_year) / ncols)
+    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 2.5, nrows * 2), constrained_layout=True)
+    years, axes = phrase_tfidfs_by_year.index, axes.flatten()
+    for year, ax in zip(years, axes):
+        phrase_tfidfs_by_year.loc[year].nlargest(10)[::-1].plot.barh(ax=ax)
+        ax.set(title=year, xlabel='tf-idf')
+        ax.tick_params(bottom=False, labelbottom=False)
+    for ax in axes[len(years):]:
+        ax.axis('off')
     return fig
 
 
