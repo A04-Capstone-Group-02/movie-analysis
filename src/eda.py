@@ -70,5 +70,5 @@ def generate_figures(data_in, data_out, **kwargs):
 
     # Generate figures
     os.makedirs(data_out, exist_ok=True)
-    # top_phrases_by_year_bar_charts(df, data_out, **kwargs)
+    top_phrases_by_year_bar_charts(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart_race(df, data_out, **kwargs)
