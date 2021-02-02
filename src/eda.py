@@ -6,8 +6,8 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
 
 
-def top_phrases_by_year(df, year_start, year_end, phrase_count_threshold):
-    """Return a Figure with the top phrases by year, ranked by tf-idf"""
+def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold):
+    """Return a DataFrame with the tf-idf of each phrase for each year (phrases are terms and years are documents)"""
     # Create a Series with a list of phrases (allowing duplicates) for each year
     phrases_by_year = df.query(f'{year_start} <= date.dt.year <= {year_end}').groupby('year').phrases.agg(lambda x: sum(x, []))
 
@@ -17,19 +17,24 @@ def top_phrases_by_year(df, year_start, year_end, phrase_count_threshold):
     phrase_counts_by_year = phrase_counts_by_year.loc[:, phrase_counts_by_year.sum().ge(phrase_count_threshold)]
 
     # Create a DataFrame with the tf-idf of each phrase for each year
-    phrase_tfidfs_by_year = pd.DataFrame(
+    tfidfs = pd.DataFrame(
         TfidfTransformer(sublinear_tf=True).fit_transform(phrase_counts_by_year).toarray(),
         index=phrase_counts_by_year.index,
         columns=phrase_counts_by_year.columns
     )
+    return tfidfs
 
-    # Plot the top phrases by year, ranked by tf-idf
+
+def top_phrases_by_year(df, **kwargs):
+    """Return a Figure with a bar plot of the top phrases (ranked by tf-idf) for each year"""
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs)
+
     ncols = 5
-    nrows = ceil(len(phrase_tfidfs_by_year) / ncols)
-    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 2.5, nrows * 2), constrained_layout=True)
-    years, axes = phrase_tfidfs_by_year.index, axes.flatten()
+    nrows = ceil(len(tfidfs) / ncols)
+    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 2.5, nrows * 1.9), constrained_layout=True)
+    years, axes = tfidfs.index, axes.flatten()
     for year, ax in zip(years, axes):
-        phrase_tfidfs_by_year.loc[year].nlargest(10)[::-1].plot.barh(ax=ax)
+        tfidfs.loc[year].nlargest(10)[::-1].plot.barh(ax=ax)
         ax.set(title=year, xlabel='tf-idf')
         ax.tick_params(bottom=False, labelbottom=False)
     for ax in axes[len(years):]:
