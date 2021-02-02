@@ -1,0 +1,8 @@
+{
+  "data_in": "data/out/data.pkl",
+  "data_out": "data/figures",
+  "dpi": 300,
+  "year_start": 1928,
+  "year_end": 2012,
+  "phrase_count_threshold": 10
+}
