@@ -25,9 +25,9 @@ def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold):
     return tfidfs
 
 
-def top_phrases_by_year(df, **kwargs):
+def top_phrases_by_year(df, stop_words, **kwargs):
     """Return a Figure with a bar plot of the top phrases (ranked by tf-idf) for each year"""
-    tfidfs = phrase_tfidfs_by_year(df, **kwargs)
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
 
     ncols = 5
     nrows = ceil(len(tfidfs) / ncols)
