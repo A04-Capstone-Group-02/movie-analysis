@@ -27,7 +27,7 @@ def download_dataset():
     os.remove("data/MovieSummaries.tar.gz")
 
 
-def get_data(autophrase_params):
+def get_data(autophrase_params, false_positive_phrases, false_positive_substrings):
     # Make data directories
     os.makedirs('data/temp', exist_ok=True)
     os.makedirs('data/out', exist_ok=True)
@@ -122,14 +122,11 @@ def get_data(autophrase_params):
             s = s.lower()
             if len(s) == 1:  # Only 1 character
                 return True
-            if s in ['imdb.com']:
+            if s in false_positive_phrases:
                 return True
-            if '|' in s:  # Leftover Wikipedia tags
-                return True
-            if 'featuring' in s:  # E.g. "featuring mithun chakraborty"
-                return True
-            if 'starring' in s:  # E.g. "starring mithun chakraborty"
-                return True
+            for false_positive_substring in false_positive_substrings:
+                if false_positive_substring in s:
+                    return True
             return False
 
         return (

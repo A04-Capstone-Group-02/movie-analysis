@@ -1,12 +1,14 @@
+from bar_chart_race import bar_chart_race
 from collections import Counter
 import matplotlib.pyplot as plt
 from math import ceil
+import numpy as np
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
 
 
-def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold):
+def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kwargs):
     """Return a DataFrame with the tf-idf of each phrase for each year (phrases are terms and years are documents)"""
     # Create a Series with a list of phrases (allowing duplicates) for each year
     phrases_by_year = df.query(f'{year_start} <= date.dt.year <= {year_end}').groupby('year').phrases.agg(lambda x: sum(x, []))
@@ -25,9 +27,9 @@ def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold):
     return tfidfs
 
 
-def top_phrases_by_year(df, **kwargs):
-    """Return a Figure with a bar plot of the top phrases (ranked by tf-idf) for each year"""
-    tfidfs = phrase_tfidfs_by_year(df, **kwargs)
+def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
+    """Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each year"""
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
 
     ncols = 5
     nrows = ceil(len(tfidfs) / ncols)
@@ -39,15 +41,34 @@ def top_phrases_by_year(df, **kwargs):
         ax.tick_params(bottom=False, labelbottom=False)
     for ax in axes[len(years):]:
         ax.axis('off')
-    return fig
+    fig.savefig(f'{data_out}/top_phrases_by_year.png', dpi=dpi, bbox_inches='tight')
 
 
-def generate_figures(data_in, data_out, dpi, **kwargs):
-    """Generate and save figures"""
+def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, fps, seconds_per_period, **kwargs):
+    """Save an MP4 with a bar chart race of the top phrases (ranked by tf-idf) for each year"""
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
+    # Only keep columns for the top phrases to reduce unnecessary computation
+    tfidfs = tfidfs[np.unique(tfidfs.apply(lambda x: x.nlargest(n_bars).index.tolist(), 1).sum())]
+
+    bar_chart_race(
+        df=tfidfs,
+        figsize=(10, 6),
+        filename=f'{data_out}/top_phrases_by_year.mp4',
+        fixed_max=True,
+        label_bars=False,
+        n_bars=n_bars,
+        period_length=seconds_per_period * 1000,
+        steps_per_period=seconds_per_period * fps,
+    )
+
+
+def generate_figures(data_in, data_out, **kwargs):
+    """Generate figures"""
     # Read in data, add new columns as needed
     df = pd.read_pickle(data_in)
     df['year'] = df.date.dt.year.astype('Int64')
 
-    # Generate and save figures
+    # Generate figures
     os.makedirs(data_out, exist_ok=True)
-    top_phrases_by_year(df, **kwargs).savefig(f'{data_out}/top_phrases_by_year.png', dpi=dpi, bbox_inches='tight')
+    top_phrases_by_year_bar_charts(df, data_out, **kwargs)
+    top_phrases_by_year_bar_chart_race(df, data_out, **kwargs)
