@@ -50,14 +50,23 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     # Only keep columns for the top phrases to reduce unnecessary computation
     tfidfs = tfidfs[np.unique(tfidfs.apply(lambda x: x.nlargest(n_bars).index.tolist(), 1).sum())]
 
+    # Prepare figure
+    fig, ax = plt.subplots(dpi=dpi, figsize=(5, 3))
+    fig.suptitle(f'Top Phrases From Wikipedia Movie Plot Summaries\n{tfidfs.index[0]}–{tfidfs.index[-1]}')
+    ax.set_frame_on(False)
+    ax.set_xlabel('tf-idf', labelpad=-1, style='italic')
+    ax.tick_params(labelbottom=False, length=0)
+    plt.subplots_adjust(left=.4)
+
+    # Create bar chart race
     bar_chart_race(
         df=tfidfs,
-        dpi=dpi,
-        figsize=(10, 6),
+        bar_size=.9,
+        fig=fig,
         filename=f'{data_out}/top_phrases_by_year.mp4',
-        fixed_max=True,
         label_bars=False,
         n_bars=n_bars,
+        period_fmt='{x:.0f}',
         period_length=seconds_per_period * 1000,
         steps_per_period=int(seconds_per_period * fps),
     )
