@@ -51,14 +51,14 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     tfidfs = tfidfs[np.unique(tfidfs.apply(lambda x: x.nlargest(n_bars).index.tolist(), 1).sum())]
 
     # Prepare figure
-    fig, ax = plt.subplots(dpi=dpi, figsize=(5, 2.5))
-    fig.suptitle(f'Top Phrases From Wikipedia Movie Plot Summaries\n{tfidfs.index[0]}–{tfidfs.index[-1]}', y=.92)
+    fig, ax = plt.subplots(dpi=dpi, figsize=(6, 3.5))
+    fig.suptitle(f'Top Phrases From Wikipedia Movie Plot Summaries\n{tfidfs.index[0]}–{tfidfs.index[-1]}', y=.94)
     ax.set_facecolor('.9')
     ax.set_xlabel('tf-idf', style='italic')
     ax.tick_params(labelbottom=False, length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    plt.subplots_adjust(bottom=.15, left=.4, right=.95, top=.75)
+    plt.subplots_adjust(left=.4, right=.95, top=.82)
 
     # Create bar chart race
     bar_chart_race(
@@ -68,7 +68,7 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
         label_bars=False,
         n_bars=n_bars,
         period_fmt='{x:.0f}',
-        period_label=dict(x=.96, y=.04, ha='right', va='bottom', size=25),
+        period_label=dict(x=.96, y=.04, ha='right', va='bottom', size=30),
         period_length=seconds_per_period * 1000,
         steps_per_period=int(seconds_per_period * fps),
     )
