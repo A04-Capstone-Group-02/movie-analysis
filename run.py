@@ -9,7 +9,7 @@ def main(targets):
     etl_params = json.load(open('config/etl.json'))
     autophrase_params = json.load(open('config/autophrase.json'))
     eda_params = json.load(open('config/eda.json'))
-    clustering_params = json.load(open('config/clustering.json')
+    clustering_params = json.load(open('config/clustering.json'))
 
     if 'download' in targets:
         download_dataset()
