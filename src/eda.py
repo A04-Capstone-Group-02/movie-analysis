@@ -44,7 +44,7 @@ def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
     fig.savefig(f'{data_out}/top_phrases_by_year.png', dpi=dpi, bbox_inches='tight')
 
 
-def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, fps, seconds_per_period, **kwargs):
+def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fps, seconds_per_period, **kwargs):
     """Save an MP4 with a bar chart race of the top phrases (ranked by tf-idf) for each year"""
     tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
     # Only keep columns for the top phrases to reduce unnecessary computation
@@ -52,13 +52,14 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, fps, se
 
     bar_chart_race(
         df=tfidfs,
+        dpi=dpi,
         figsize=(10, 6),
         filename=f'{data_out}/top_phrases_by_year.mp4',
         fixed_max=True,
         label_bars=False,
         n_bars=n_bars,
         period_length=seconds_per_period * 1000,
-        steps_per_period=seconds_per_period * fps,
+        steps_per_period=int(seconds_per_period * fps),
     )
 
 
