@@ -1,0 +1,12 @@
+{
+  "data_in": "data/out/data.pkl",
+  "data_out": "data/figures",
+  "year_start": 1928,
+  "year_end": 2012,
+  "phrase_count_threshold": 2,
+  "stop_words": ["film", "life"],
+  "n_bars": 7,
+  "dpi": 300,
+  "fps": 60,
+  "seconds_per_period": 4
+}
