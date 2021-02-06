@@ -1,0 +1,5 @@
+{
+  "data_in": "test/data/raw",
+  "false_positive_phrases": ["falls", "imdb.com"],
+  "false_positive_substrings": ["|", "featuring", "starring"]
+}
