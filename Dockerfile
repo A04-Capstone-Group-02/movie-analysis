@@ -1,7 +1,7 @@
 FROM ucsdets/scipy-ml-notebook
 LABEL maintainer="Daniel Lee <dhl011@ucsd.edu> & Yuxuan Fan <yufan@ucsd.edu>"
 USER root
-# FFmpeg, JDK8
+# FFmpeg, JDK 8
 RUN apt-get update && apt-get install -y ffmpeg openjdk-8-jdk
 # PyTorch
 RUN pip uninstall --no-cache-dir -y torch torchvision && \
