@@ -1,6 +1,4 @@
-# movie-analysis
-
-Analyzing Movies Using Phrase Mining.
+# Analyzing Movies Using Phrase Mining
 
 ## Setup
 
@@ -13,7 +11,7 @@ Download the [CMU Movie Summary Corpus dataset](http://www.cs.cmu.edu/~ark/perso
 ## How to Run
 
 ```
-python run.py [data] [eda] [train] [test]
+python run.py [data] [eda] [test]
 ```
 
 ## Contributors
