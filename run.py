@@ -9,11 +9,12 @@ def main(targets):
     if 'test' in targets:
         targets = ['data', 'eda']
         etl_params = json.load(open('config/etl_test.json'))
+        eda_params = json.load(open('config/eda_test.json'))
     else:
         etl_params = json.load(open('config/etl.json'))
+        eda_params = json.load(open('config/eda.json'))
 
     autophrase_params = json.load(open('config/autophrase.json'))
-    eda_params = json.load(open('config/eda.json'))
     clustering_params = json.load(open('config/clustering.json'))
 
     if 'download' in targets:
