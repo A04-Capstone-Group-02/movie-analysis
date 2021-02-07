@@ -7,9 +7,15 @@ import sys
 
 
 def main(targets):
-    etl_params = json.load(open('config/etl.json'))
+    if 'test' in targets:
+        targets = ['data', 'eda']
+        etl_params = json.load(open('config/etl_test.json'))
+        eda_params = json.load(open('config/eda_test.json'))
+    else:
+        etl_params = json.load(open('config/etl.json'))
+        eda_params = json.load(open('config/eda.json'))
+
     autophrase_params = json.load(open('config/autophrase.json'))
-    eda_params = json.load(open('config/eda.json'))
     clustering_params = json.load(open('config/clustering.json'))
     clf_params = json.load(open('config/classification.json'))
 
@@ -24,15 +30,9 @@ def main(targets):
     
     if 'clustering' in targets:
         calc_all_embeddings(clustering_params)
-        
+
     if 'classification' in targets:
         model(clf_params)
-        
-    if 'train' in targets:
-        ...
-
-    if 'test' in targets:
-        ...
 
 
 if __name__ == '__main__':

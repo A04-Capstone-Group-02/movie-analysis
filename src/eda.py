@@ -29,7 +29,7 @@ def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kw
 
 def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
     """Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each year"""
-    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
     ncols = 5
     nrows = ceil(len(tfidfs) / ncols)
@@ -46,7 +46,7 @@ def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
 
 def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fps, seconds_per_period, **kwargs):
     """Save an MP4 with a bar chart race of the top phrases (ranked by tf-idf) for each year"""
-    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words)
+    tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words, errors='ignore')
     # Only keep columns for the top phrases to reduce unnecessary computation
     tfidfs = tfidfs[np.unique(tfidfs.apply(lambda x: x.nlargest(n_bars).index.tolist(), 1).sum())]
 

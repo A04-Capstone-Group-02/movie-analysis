@@ -27,7 +27,7 @@ def download_dataset():
     os.remove("data/MovieSummaries.tar.gz")
 
 
-def get_data(autophrase_params, false_positive_phrases, false_positive_substrings):
+def get_data(autophrase_params, data_in, false_positive_phrases, false_positive_substrings):
     # Make data directories
     os.makedirs('data/temp', exist_ok=True)
     os.makedirs('data/out', exist_ok=True)
@@ -89,7 +89,7 @@ def get_data(autophrase_params, false_positive_phrases, false_positive_substring
         )
 
     movies = pd.read_csv(
-        'data/raw/movie.metadata.tsv',
+        f'{data_in}/movie.metadata.tsv',
         converters={'languages': normalize_languages, 'countries': normalize_countries, 'genres': normalize_genres},
         delimiter='\t',
         header=None,
@@ -99,7 +99,7 @@ def get_data(autophrase_params, false_positive_phrases, false_positive_substring
     ).assign(date=lambda x: pd.to_datetime(x.date, errors='coerce'))
 
     summaries = pd.read_csv(
-        'data/raw/plot_summaries.txt',
+        f'{data_in}/plot_summaries.txt',
         delimiter='\t',
         header=None,
         index_col='id',
