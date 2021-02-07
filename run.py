@@ -2,6 +2,7 @@ import json
 from src.eda import generate_figures
 from src.etl import get_data, download_dataset
 from src.clustering import calc_all_embeddings
+from src.classification import model
 import sys
 
 
@@ -10,6 +11,7 @@ def main(targets):
     autophrase_params = json.load(open('config/autophrase.json'))
     eda_params = json.load(open('config/eda.json'))
     clustering_params = json.load(open('config/clustering.json'))
+    clf_params = json.load(open('config/classification.json'))
 
     if 'download' in targets:
         download_dataset()
@@ -22,7 +24,10 @@ def main(targets):
     
     if 'clustering' in targets:
         calc_all_embeddings(clustering_params)
-
+        
+    if 'classification' in targets:
+        model(clf_params)
+        
     if 'train' in targets:
         ...
 
