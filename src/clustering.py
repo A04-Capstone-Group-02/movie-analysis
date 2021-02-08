@@ -1,3 +1,4 @@
+import os
 import spacy
 import numpy as np
 import pandas as pd
@@ -9,6 +10,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from plot_clusters import plot_all_clusters
 
 spacy_en = spacy.load("en_core_web_sm")
 
@@ -57,7 +59,7 @@ def calc_all_embeddings(df, model, rep_sents_path, doc_embs_path, num_workers):
     else:
         pandarallel.initialize(nb_workers=num_workers)
         rep_sents = df.parallel_apply(pick_rep_sentences, axis=1).to_numpy()
-    np.save("data/temp/rep_sents.npy", rep_sents, allow_pickle=True)
+    np.save("model/clustering/rep_sents.npy", rep_sents, allow_pickle=True)
 
     # calculate document embeddings
     print("[clustering] calculating document embeddings...")
@@ -66,17 +68,18 @@ def calc_all_embeddings(df, model, rep_sents_path, doc_embs_path, num_workers):
     else:
         rs_tqdm = tqdm(rep_sents, position=0)
         doc_embs = np.array([embed_doc(rs, model) for rs in rs_tqdm])
-    np.save("data/temp/doc_embs.npy", doc_embs, allow_pickle=False)
+    np.save("model/clustering/doc_embs.npy", doc_embs, allow_pickle=False)
     return doc_embs
 
 
-def dimensionality_reduction(embs, method="PCA"):
+def dim_reduction(embs, num_workers, method="PCA"):
     dr = PCA(n_components=2)
     if isinstance(method, str) and method.upper() == "TSNE":
-        dr = TSNE(n_components=2, n_jobs=12, verbose=1)
+        dr = TSNE(n_components=2, n_jobs=num_workers, verbose=1)
     print(f"[clustering] running {dr.__class__.__name__}...")
     dr_embs = dr.fit_transform(embs)
-    np.save("data/temp/dr_embs.npy", dr_embs, allow_pickle=False)
+    np.save("model/clustering/dr_embs.npy", dr_embs, allow_pickle=False)
+    return dr_embs
 
 
 def run_clustering(config):
@@ -88,16 +91,16 @@ def run_clustering(config):
 
     # setup
     print("[clustering] setting up...")
+    os.makedirs("model/clustering", exist_ok=True)
     df = pd.read_pickle("data/out/data.pkl")
     sbert = SentenceTransformer("distilbert-base-nli-mean-tokens")
 
-    # document embedding
+    # run steps
     doc_embs = calc_all_embeddings(
         df, sbert, rep_sents_path, doc_embs_path, num_workers
     )
-
-    # run dim reduction
-    dimensionality_reduction(doc_embs, dim_reduction_method)
+    dr_embs = dim_reduction(doc_embs, num_workers, dim_reduction_method)
+    plot_all_clusters(df, dr_embs)
 
 
 class SimilarityQueryHandler:

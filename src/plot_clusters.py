@@ -5,6 +5,7 @@ from sklearn.preprocessing import OneHotEncoder, MultiLabelBinarizer
 
 
 def plot_2d_cluster(df, embs, col, min_cnt=500, subplot_size=7):
+    print(f"[clustering] plotting 2d clusters vs. {col}...")
     mlb = MultiLabelBinarizer()
     bin_col = mlb.fit_transform(df[col])
     bin_col = pd.DataFrame(bin_col, columns=mlb.classes_)
@@ -16,6 +17,10 @@ def plot_2d_cluster(df, embs, col, min_cnt=500, subplot_size=7):
     bin_col_tp = bin_col[val_tp]
 
     ncol = 3
+    if bin_col_tp.shape[1] < ncol:
+        print("[clustering] warning: ignoring min_cnt since it's too large.")
+        bin_col_tp = bin_col
+    
     nrow = int(np.ceil(bin_col_tp.shape[1] / ncol))
     fig, axes = plt.subplots(
         nrow, ncol, figsize=(ncol * subplot_size, nrow * subplot_size)
@@ -27,10 +32,11 @@ def plot_2d_cluster(df, embs, col, min_cnt=500, subplot_size=7):
         embs_pos = embs[bin_col_tp[val][bin_col_tp[val] == 1].index]
         ax.scatter(embs_neg[:, 0], embs_neg[:, 1], c="lightgrey", s=60)
         ax.scatter(embs_pos[:, 0], embs_pos[:, 1], c="C0", s=60, alpha=0.15)
-    fig.savefig(f"data/report/2d_cluster_{col}.png")
+    fig.savefig(f"data/figures/2d_cluster_{col}.png")
 
 
 def plot_2d_cluster_by_year(df, embs, subplot_size=7):
+    print("[clustering] plotting 2d clusters vs. years...")
     onehot = OneHotEncoder()
     bin_year = onehot.fit_transform(
         df.date.apply(lambda dt: dt.year).to_frame()
@@ -52,4 +58,9 @@ def plot_2d_cluster_by_year(df, embs, subplot_size=7):
         embs_pos = embs[bin_year[val][bin_year[val] == 1].index]
         ax.scatter(embs_neg[:, 0], embs_neg[:, 1], c="lightgrey", s=60)
         ax.scatter(embs_pos[:, 0], embs_pos[:, 1], c="C0", s=60, alpha=0.35)
-    fig.savefig(f"data/report/2d_cluster_year.png")
+    fig.savefig(f"data/figures/2d_cluster_years.png")
+
+def plot_all_clusters(df, embs):
+    for feature in ["languages", "countries", "genres"]:
+        plot_2d_cluster(df, embs, feature)
+    plot_2d_cluster_by_year(df, embs)
