@@ -88,7 +88,7 @@ def run_clustering(config):
 
     # setup
     print("[clustering] setting up...")
-    df = pd.read_pickle("../data/out/data.pkl")
+    df = pd.read_pickle("data/out/data.pkl")
     sbert = SentenceTransformer("distilbert-base-nli-mean-tokens")
 
     # document embedding
