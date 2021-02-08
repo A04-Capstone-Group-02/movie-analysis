@@ -116,4 +116,5 @@ def model(config):
     print("=============Results=============")
     print('model performance using movie plot summary: '+ s +'\n' )
     print('model performance using phrases: '+p)
+      
         
