@@ -18,6 +18,10 @@ Note that to run this repository on UCSD DSMLP server, the dataset must be manua
 
 Build a docker container with the `Dockerfile` or the remote image `991231/movie-analysis` in the docker hub.
 
+### Note
+
+To run the `clustering` target, we highly recommend enabling GPU to ensure reasonable running time, since this target heavily interacts with a transformer model. Running other targets without GPU will not be a issue.
+
 ## Run
 
 Execute the running script with the following command:
