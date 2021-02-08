@@ -50,13 +50,13 @@ def baseline_model(plot_summary,genre):
     
     
     #evaluation
-    f1 = sklearn.metrics.f1_score(yval, y_pred, average="micro")
+    f1 = "f1-score: "+str(sklearn.metrics.f1_score(yval, y_pred, average="micro"))
     
     e1 = 'percentage of genres that are correctly predicted: '+ str(np.sum([len(set(a).intersection(b)) for a, b in \
                   zip(pd.Series(predicted_genre), pd.Series(actual_genre))])/sum(genre.apply(len)))
     e2 = 'percentage of movies that have at least one gnere predicted right: '+str(np.sum([len(set(a).intersection(b))>0 for a, b in\
                   zip(pd.Series(predicted_genre), pd.Series(actual_genre))])/len(genre))
-    return f1,e1,e2
+    return (f1+"\n"+e1+"\n"+e2+"\n")
 
 def tunning_params(summary,genre):
     """parameter tuned classify models"""
@@ -85,21 +85,35 @@ def tunning_params(summary,genre):
     model_tunning.fit(xtrain_tfidf,ytrain)
     y_pred = model_tunning.best_estimator_.predict(xval_tfidf)
     
-    f1 = sklearn.metrics.f1_score(yval, y_pred, average="micro")
-    return model_tunning.best_estimator_,f1
+    # Predicted label
+    actual_genre = multilabel_binarizer.inverse_transform(yval)
+    predicted_genre = multilabel_binarizer.inverse_transform(y_pred)
+    
+    
+    #evaluation
+    f1 = "f1-score: "+str(sklearn.metrics.f1_score(yval, y_pred, average="micro"))
+    
+    e1 = 'percentage of genres that are correctly predicted: '+ str(np.sum([len(set(a).intersection(b)) for a, b in \
+                  zip(pd.Series(predicted_genre), pd.Series(actual_genre))])/sum(genre.apply(len)))
+    e2 = 'percentage of movies that have at least one gnere predicted right: '+str(np.sum([len(set(a).intersection(b))>0 for a, b in\
+                  zip(pd.Series(predicted_genre), pd.Series(actual_genre))])/len(genre))
+    
+    return (f1+"\n"+e1+"\n"+e2+"\n")
 
 def model(config):
     pikl = pd.read_pickle(config['data'])
+    baseline = config['baseline']
     df = pikl.dropna(subset = ['genres'])
     summary = df['summary']
     genre = df['genres']
     phrase = df['phrases'].apply(lambda x: ' '.join(x))
-    baseline = True
-    if baseline:
+    if baseline == 'True':
         s = baseline_model(summary,genre)
         p = baseline_model(phrase,genre)
     else:
-        s = tunning_params(summary_genre)
-        p = tunning_params(summary_genre)
-    print('model performance using movie plot summary: '+ str(s)+'\n' + 'model performance using phrases: '+str(p))
+        s = tunning_params(summary,genre)
+        p = tunning_params(phrase,genre)
+    print("=============Results=============")
+    print('model performance using movie plot summary: '+ s +'\n' )
+    print('model performance using phrases: '+p)
         

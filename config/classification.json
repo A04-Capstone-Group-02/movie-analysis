@@ -1,3 +1,4 @@
 {
-    "data":"data/out/data.pkl"
+    "data":"data/out/data.pkl",
+    "baseline": 0
 }
