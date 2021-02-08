@@ -12,7 +12,7 @@ git clone --recursive https://github.com/A04-Capstone-Group-02/movie-analysis.gi
 
 Download the [CMU Movie Summary Corpus dataset](http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz) and move its files to `data/raw/`, or run the `download` target.
 
-Note that to run this repository on UCSD DSMLP server, the dataset must be manually uploaded, since the DSMLP server cannot connect to the data source link.
+Note that to run this repository on the UCSD DSMLP server, the dataset must be manually uploaded, since the DSMLP server cannot connect to the data source link.
 
 ### Docker
 
@@ -20,7 +20,7 @@ Build a docker container with the `Dockerfile` or the remote image `991231/movie
 
 ### Note
 
-To run the `clustering` target, we highly recommend enabling GPU to ensure reasonable running time, since this target heavily interacts with a transformer model. Running other targets without GPU will not be a issue.
+To run the `clustering` target, we highly recommend enabling GPU to ensure reasonable running time, since this target heavily interacts with a transformer model. Running other targets without GPU will not be an issue.
 
 ## Run
 
@@ -36,11 +36,11 @@ Run `data`, `eda`, `classification` and `clustering` targets in this exact order
 
 ### `test` target
 
-Runs the same 4 targets in the same order as the `all` target, but using the test data in `test/data/raw` and the test configuations.
+Runs the same 4 targets in the same order as the `all` target, but using the test data in `test/data/raw` and the test configurations.
 
 ### `download` target
 
-Download the CMU Movie Summary Corpus dataset and setup the directories.
+Download the CMU Movie Summary Corpus dataset and set up the `data` directory.
 
 ### `data` target
 
@@ -79,7 +79,7 @@ The configuration file for this target is `eda.json` (or `eda_test.json` for `te
 
 ### `classification` target
 
-Run the classification pipeline. This target will transform the data into tf-idf matrix, fit a one-vs-rest logistic regression as the classifier and tune the parameters if specified.
+Run the classification pipeline. This target will transform the data into a TF-IDF matrix, fit a one-vs-rest logistic regression as the classifier and tune the parameters if specified.
 
 The configuration file for this target is `classification.json`, which contains the following items:
 
@@ -88,7 +88,7 @@ The configuration file for this target is `classification.json`, which contains 
 
 ### `clustering` target
 
-Run the clustering pipeline. This target will transform the data into tf-idf matrix, fit a one-vs-rest logistic regression as the classifier and tune the parameters if specified.
+Run the clustering pipeline. This target will pick representative sentences based on average sublinear TF-IDF score on the quality phrases, calculate document embeddings by average the Sentence-BERT embeddings of the representative sentences, and visualize the clusters.
 
 The configuration file for this target is `clustering.json`, which contains the following items:
 
