@@ -19,7 +19,7 @@ def download_dataset():
     print("Downloading the dataset...")
     with open("data/MovieSummaries.tar.gz", "wb") as archive:
         url = "http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz"
-        res = requests.get(url)
+        res = requests.get(url, timeout=60)
         if not res.ok:
             sys.exit(
                 "Failed to connect to the data source, "
