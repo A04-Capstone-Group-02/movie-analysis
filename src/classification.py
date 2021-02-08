@@ -99,7 +99,7 @@ def model(config):
         s = baseline_model(summary,genre)
         p = baseline_model(phrase,genre)
     else:
-        s = tunning_params(summary_genre)
-        p = tunning_params(summary_genre)
+        s = tunning_params(summary,genre)
+        p = tunning_params(summary,genre)
     print('model performance using movie plot summary: '+ str(s)+'\n' + 'model performance using phrases: '+str(p))
         
