@@ -6,9 +6,10 @@ from src.classification import model
 import sys
 
 
+
 def main(targets):
     if 'test' in targets:
-        targets = ['data', 'eda']
+        targets = ['data', 'eda', 'classification', 'clustering']
         etl_params = json.load(open('config/etl_test.json'))
         eda_params = json.load(open('config/eda_test.json'))
     else:
@@ -16,8 +17,8 @@ def main(targets):
         eda_params = json.load(open('config/eda.json'))
 
     autophrase_params = json.load(open('config/autophrase.json'))
-    clustering_params = json.load(open('config/clustering.json'))
     clf_params = json.load(open('config/classification.json'))
+    clustering_params = json.load(open('config/clustering.json'))
 
     if 'download' in targets:
         download_dataset()
@@ -27,12 +28,15 @@ def main(targets):
 
     if 'eda' in targets:
         generate_figures(**eda_params)
-    
+
     if 'clustering' in targets:
         run_clustering(clustering_params)
 
     if 'classification' in targets:
         model(clf_params)
+
+    if 'clustering' in targets:
+        calc_all_embeddings(clustering_params)
 
 
 if __name__ == '__main__':
