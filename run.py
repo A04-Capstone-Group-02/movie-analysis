@@ -6,6 +6,7 @@ from src.classification import model
 import sys
 
 
+
 def main(targets):
     if 'test' in targets:
         targets = ['data', 'eda', 'classification', 'clustering']
