@@ -10,7 +10,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from plot_clusters import plot_all_clusters
+from .plot_clusters import plot_all_clusters
 
 spacy_en = spacy.load("en_core_web_sm")
 

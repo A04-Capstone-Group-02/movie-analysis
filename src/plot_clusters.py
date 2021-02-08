@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -61,6 +62,7 @@ def plot_2d_cluster_by_year(df, embs, subplot_size=7):
     fig.savefig(f"data/figures/2d_cluster_years.png")
 
 def plot_all_clusters(df, embs):
+    os.makedirs("data/figures", exist_ok=True)
     for feature in ["languages", "countries", "genres"]:
         plot_2d_cluster(df, embs, feature)
     plot_2d_cluster_by_year(df, embs)
