@@ -1,7 +1,7 @@
 import json
 from src.eda import generate_figures
 from src.etl import get_data, download_dataset
-from src.clustering import calc_all_embeddings
+from src.clustering import run_clustering
 from src.classification import model
 import sys
 
@@ -29,9 +29,12 @@ def main(targets):
     if 'eda' in targets:
         generate_figures(**eda_params)
 
+    if 'clustering' in targets:
+        run_clustering(clustering_params)
+
     if 'classification' in targets:
         model(clf_params)
-    
+
     if 'clustering' in targets:
         calc_all_embeddings(clustering_params)
 

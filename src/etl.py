@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import sys
 import pandas as pd
 from pandas_profiling import ProfileReport
 import re
@@ -19,6 +20,11 @@ def download_dataset():
     with open("data/MovieSummaries.tar.gz", "wb") as archive:
         url = "http://www.cs.cmu.edu/~ark/personas/data/MovieSummaries.tar.gz"
         res = requests.get(url)
+        if not res.ok:
+            sys.exit(
+                "Failed to connect to the data source, "
+                "please download the data manually."
+            )
         archive.write(res.content)
     shutil.unpack_archive("data/MovieSummaries.tar.gz", "data")
 
