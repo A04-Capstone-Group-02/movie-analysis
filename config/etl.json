@@ -1,5 +1,5 @@
 {
   "data_in": "data/raw",
-  "false_positive_phrases": ["falls", "imdb.com", "leaves", "runs", "tom grabs"],
+  "false_positive_phrases": ["falls", "imdb.com", "leaves", "ref name junpo", "runs", "tom chases", "tom grabs","tora-san's"],
   "false_positive_substrings": ["|", "featuring", "starring"]
 }
