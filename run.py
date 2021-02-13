@@ -1,9 +1,9 @@
 import sys
 import json
-from src.eda import generate_figures
 from src.etl import get_data, download_dataset
-from src.clustering import run_clustering
+from src.eda import generate_figures
 from src.classification import model
+from src.clustering import run_clustering
 
 
 def main(targets):
