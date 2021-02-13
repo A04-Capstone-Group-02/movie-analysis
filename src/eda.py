@@ -1,11 +1,24 @@
 from bar_chart_race import bar_chart_race
 from collections import Counter
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FixedLocator, MultipleLocator
 from math import ceil
 import numpy as np
 import os
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
+
+
+def number_movies_per_year_bar_chart(df, data_out, dpi, **kwargs):
+    """Save a Figure with a bar chart of the number of movies per year"""
+    fig, ax = plt.subplots(figsize=(7, 1.5))
+    number_movies_per_year = df.year.value_counts().sort_index()
+    number_movies_per_year.plot.bar(ax=ax)
+    ax.set(title='# Movies in Dataset', xlabel='Year', ylabel='# Movies')
+    ax.tick_params(rotation=0)
+    ax.xaxis.set_major_locator(FixedLocator([i for i, year in enumerate(number_movies_per_year.index) if year % 10 == 0]))
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    fig.savefig(f'{data_out}/number_movies_per_year_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
 
 def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kwargs):
@@ -27,7 +40,7 @@ def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kw
     return tfidfs
 
 
-def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
+def top_phrases_by_year_bar_chart(df, data_out, stop_words, dpi, **kwargs):
     """Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each year"""
     tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
@@ -41,7 +54,7 @@ def top_phrases_by_year_bar_charts(df, data_out, stop_words, dpi, **kwargs):
         ax.tick_params(bottom=False, labelbottom=False)
     for ax in axes[len(years):]:
         ax.axis('off')
-    fig.savefig(f'{data_out}/top_phrases_by_year.png', dpi=dpi, bbox_inches='tight')
+    fig.savefig(f'{data_out}/top_phrases_by_year_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
 
 def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fps, seconds_per_period, **kwargs):
@@ -64,7 +77,7 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     bar_chart_race(
         df=tfidfs,
         fig=fig,
-        filename=f'{data_out}/top_phrases_by_year.mp4',
+        filename=f'{data_out}/top_phrases_by_year_bar_chart_race.mp4',
         label_bars=False,
         n_bars=n_bars,
         period_fmt='{x:.0f}',
@@ -82,5 +95,6 @@ def generate_figures(data_in, data_out, **kwargs):
 
     # Generate figures
     os.makedirs(data_out, exist_ok=True)
-    top_phrases_by_year_bar_charts(df, data_out, **kwargs)
+    number_movies_per_year_bar_chart(df, data_out, **kwargs)
+    top_phrases_by_year_bar_chart(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart_race(df, data_out, **kwargs)
