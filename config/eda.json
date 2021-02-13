@@ -6,7 +6,7 @@
   "decade_start": 1910,
   "decade_end": 2014,
   "phrase_count_threshold": 10,
-  "stop_words": ["film", "life"],
+  "stop_words": ["death", "family", "film", "friends", "house", "life", "long", "love", "money", "marriage", "order", "police", "town"],
   "n_bars": 7,
   "dpi": 300,
   "fps": 60,
