@@ -10,7 +10,9 @@ from sklearn.feature_extraction.text import TfidfTransformer
 
 
 def number_movies_per_year_bar_chart(df, data_out, dpi, **kwargs):
-    """Save a Figure with a bar chart of the number of movies per year"""
+    """
+    Save a Figure with a bar chart of the number of movies per year.
+    """
     fig, ax = plt.subplots(figsize=(7, 1.5))
     number_movies_per_year = df.year.value_counts().sort_index()
     number_movies_per_year.plot.bar(ax=ax)
@@ -21,8 +23,18 @@ def number_movies_per_year_bar_chart(df, data_out, dpi, **kwargs):
     fig.savefig(f'{data_out}/number_movies_per_year_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
 
+def highest_grossing_movie_containing_phrase(df, phrase):
+    """
+    Return the highest-grossing movie containing the given phrase.
+    Break ties by picking the movie with the earliest release date.
+    """
+    return df[df.phrases.apply(lambda x: phrase in x)].sort_values(['revenue', 'date'], ascending=[False, True]).iloc[0]
+
+
 def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kwargs):
-    """Return a DataFrame with the tf-idf of each phrase for each year (phrases are terms and years are documents)"""
+    """
+    Return a DataFrame with the tf-idf of each phrase for each year (phrases are terms and years are documents).
+    """
     # Create a Series with a list of phrases (allowing duplicates) for each year
     phrases_by_year = df.query(f'{year_start} <= date.dt.year <= {year_end}').groupby('year').phrases.agg(lambda x: sum(x, []))
 
@@ -40,8 +52,31 @@ def phrase_tfidfs_by_year(df, year_start, year_end, phrase_count_threshold, **kw
     return tfidfs
 
 
+def phrase_tfidfs_by_decade(df, decade_start, decade_end, phrase_count_threshold, **kwargs):
+    """
+    Return a DataFrame with the tf-idf of each phrase for each decade (phrases are terms and decades are documents).
+    """
+    # Create a Series with a list of phrases (allowing duplicates) for each decade
+    phrases_by_decade = df.query(f'{decade_start} <= date.dt.year <= {decade_end}').assign(decade=lambda x: x.year // 10 * 10).groupby('decade').phrases.agg(lambda x: sum(x, []))
+
+    # Create a DataFrame with the count of each phrase for each decade
+    phrase_counts_by_decade = pd.DataFrame(phrases_by_decade.apply(Counter).tolist(), index=phrases_by_decade.index).fillna(0).sort_index(1)
+    # Only include phrases that appear at least `phrase_count_threshold` times total
+    phrase_counts_by_decade = phrase_counts_by_decade.loc[:, phrase_counts_by_decade.sum().ge(phrase_count_threshold)]
+
+    # Create a DataFrame with the tf-idf of each phrase for each decade
+    tfidfs = pd.DataFrame(
+        TfidfTransformer(sublinear_tf=True).fit_transform(phrase_counts_by_decade).toarray(),
+        index=phrase_counts_by_decade.index,
+        columns=phrase_counts_by_decade.columns
+    )
+    return tfidfs
+
+
 def top_phrases_by_year_bar_chart(df, data_out, stop_words, dpi, **kwargs):
-    """Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each year"""
+    """
+    Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each year.
+    """
     tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
     ncols = 5
@@ -58,7 +93,9 @@ def top_phrases_by_year_bar_chart(df, data_out, stop_words, dpi, **kwargs):
 
 
 def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fps, seconds_per_period, **kwargs):
-    """Save an MP4 with a bar chart race of the top phrases (ranked by tf-idf) for each year"""
+    """
+    Save an MP4 with a bar chart race of the top phrases (ranked by tf-idf) for each year.
+    """
     tfidfs = phrase_tfidfs_by_year(df, **kwargs).drop(columns=stop_words, errors='ignore')
     # Only keep columns for the top phrases to reduce unnecessary computation
     tfidfs = tfidfs[np.unique(tfidfs.apply(lambda x: x.nlargest(n_bars).index.tolist(), 1).sum())]
@@ -87,8 +124,52 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     )
 
 
+def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflow, dpi, **kwargs):
+    """
+    Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each decade.
+    Annotate each phrase with its corresponding highest-grossing movie within the decade.
+    """
+    def format_movie_name(movie, movie_name_overflow):
+        name = movie['name'] if len(movie['name']) <= movie_name_overflow else movie['name'][:movie_name_overflow - 3].strip() + '...'
+        return f'{name} ({movie.year})'
+
+    tfidfs = phrase_tfidfs_by_decade(df, **kwargs).drop(columns=stop_words, errors='ignore')
+
+    nrows = len(tfidfs)
+    fig, axes = plt.subplots(nrows, sharex=True, figsize=(.8, nrows * 2), constrained_layout=True)
+    for decade, ax in zip(tfidfs.index, axes.flatten()):
+        # Get top phrases
+        top_phrases = tfidfs.loc[decade].nlargest(10)[::-1]
+        top_phrases.plot.barh(ax=ax)
+
+        # Get corresponding movie names
+        df_decade = df.query(f'{decade} <= date.dt.year < {decade + 10}')
+        movie_names = [format_movie_name(highest_grossing_movie_containing_phrase(df_decade, phrase), movie_name_overflow)
+                       for phrase in top_phrases.index]
+        for rect, movie_name in zip(ax.patches, movie_names):
+            ax.annotate(
+                movie_name,
+                xy=(rect.get_width(), rect.get_y() + rect.get_height() / 2),
+                xytext=(5, 0),
+                textcoords="offset points",
+                size=8,
+                ha='left',
+                va='center',
+                style='italic'
+            )
+
+        ax.set(title=f'{decade}s', xlabel='tf-idf')
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.tick_params(bottom=False, labelbottom=False)
+    fig.savefig(f'{data_out}/top_phrases_by_decade_bar_chart.png', dpi=dpi, bbox_inches='tight')
+
+
 def generate_figures(data_in, data_out, **kwargs):
-    """Generate figures"""
+    """
+    Generate figures.
+    """
     # Read in data, add new columns as needed
     df = pd.read_pickle(data_in)
     df['year'] = df.date.dt.year.astype('Int64')
@@ -98,3 +179,4 @@ def generate_figures(data_in, data_out, **kwargs):
     number_movies_per_year_bar_chart(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart_race(df, data_out, **kwargs)
+    top_phrases_by_decade_bar_chart(df, data_out, **kwargs)
