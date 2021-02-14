@@ -9,6 +9,18 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfTransformer
 
 
+def example_dataset_row(df, data_out, example_movie):
+    """
+    Save a JSON file with the row of the dataset corresponding to the given movie name
+    """
+    row = df[df.name == example_movie]
+    if len(row) == 0:
+        raise ValueError(f'{example_movie} is not in the dataset')
+    if len(row) > 1:
+        raise ValueError(f'More than one movie in the dataset has the name {example_movie}')
+    row.squeeze().to_json(f'{data_out}/example_dataset_row.json', date_format='iso')
+
+
 def number_movies_per_year_bar_chart(df, data_out, dpi, **kwargs):
     """
     Save a Figure with a bar chart of the number of movies per year.
@@ -82,12 +94,12 @@ def top_phrases_by_year_bar_chart(df, data_out, stop_words, dpi, **kwargs):
     ncols = 5
     nrows = ceil(len(tfidfs) / ncols)
     fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 2.5, nrows * 1.9), constrained_layout=True)
-    years, axes = tfidfs.index, axes.flatten()
-    for year, ax in zip(years, axes):
+    axes = axes.flatten()
+    for year, ax in zip(tfidfs.index, axes):
         tfidfs.loc[year].nlargest(10)[::-1].plot.barh(ax=ax)
         ax.set(title=year, xlabel='tf-idf')
         ax.tick_params(bottom=False, labelbottom=False)
-    for ax in axes[len(years):]:
+    for ax in axes[len(tfidfs):]:
         ax.axis('off')
     fig.savefig(f'{data_out}/top_phrases_by_year_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
@@ -108,7 +120,7 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     ax.tick_params(labelbottom=False, length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
-    plt.subplots_adjust(left=.4, right=.95, top=.82)
+    fig.subplots_adjust(left=.4, right=.95, top=.82)
 
     # Create bar chart race
     bar_chart_race(
@@ -135,24 +147,26 @@ def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflo
 
     tfidfs = phrase_tfidfs_by_decade(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
-    nrows = len(tfidfs)
-    fig, axes = plt.subplots(nrows, sharex=True, figsize=(.8, nrows * 2), constrained_layout=True)
+    ncols = 2
+    nrows = ceil(len(tfidfs) / ncols)
+    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 3, nrows * 2.5))
+    axes = axes.flatten()
     for decade, ax in zip(tfidfs.index, axes.flatten()):
-        # Get top phrases
-        top_phrases = tfidfs.loc[decade].nlargest(10)[::-1]
-        top_phrases.plot.barh(ax=ax)
+        # Plot top phrases
+        phrases = tfidfs.loc[decade].nlargest(10)[::-1]
+        phrases.plot.barh(ax=ax)
 
-        # Get corresponding movie names
+        # Annotate with corresponding movie names
         df_decade = df.query(f'{decade} <= date.dt.year < {decade + 10}')
         movie_names = [format_movie_name(highest_grossing_movie_containing_phrase(df_decade, phrase), movie_name_overflow)
-                       for phrase in top_phrases.index]
+                       for phrase in phrases.index]
         for rect, movie_name in zip(ax.patches, movie_names):
             ax.annotate(
                 movie_name,
                 xy=(rect.get_width(), rect.get_y() + rect.get_height() / 2),
                 xytext=(5, 0),
                 textcoords="offset points",
-                size=8,
+                size=7.5,
                 ha='left',
                 va='center',
                 style='italic'
@@ -163,10 +177,13 @@ def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflo
         ax.spines['bottom'].set_visible(False)
         ax.spines['right'].set_visible(False)
         ax.tick_params(bottom=False, labelbottom=False)
+    for ax in axes[len(tfidfs):]:
+        ax.axis('off')
+    fig.subplots_adjust(wspace=6)
     fig.savefig(f'{data_out}/top_phrases_by_decade_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
 
-def generate_figures(data_in, data_out, **kwargs):
+def generate_figures(data_in, data_out, example_movie, **kwargs):
     """
     Generate figures.
     """
@@ -176,6 +193,7 @@ def generate_figures(data_in, data_out, **kwargs):
 
     # Generate figures
     os.makedirs(data_out, exist_ok=True)
+    example_dataset_row(df, data_out, example_movie)
     number_movies_per_year_bar_chart(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart(df, data_out, **kwargs)
     top_phrases_by_year_bar_chart_race(df, data_out, **kwargs)
