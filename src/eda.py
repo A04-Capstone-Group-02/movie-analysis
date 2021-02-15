@@ -25,10 +25,10 @@ def number_movies_per_year_bar_chart(df, data_out, dpi, **kwargs):
     """
     Save a Figure with a bar chart of the number of movies per year.
     """
-    fig, ax = plt.subplots(figsize=(7, 1.5))
+    fig, ax = plt.subplots(figsize=(7, 1.1))
     number_movies_per_year = df.year.value_counts().sort_index()
     number_movies_per_year.plot.bar(ax=ax)
-    ax.set(title='# Movies in Dataset', xlabel='Year', ylabel='# Movies')
+    ax.set(xlabel='Year', ylabel='# Movies')
     ax.tick_params(rotation=0)
     ax.xaxis.set_major_locator(FixedLocator([i for i, year in enumerate(number_movies_per_year.index) if year % 10 == 0]))
     ax.xaxis.set_minor_locator(MultipleLocator(1))
