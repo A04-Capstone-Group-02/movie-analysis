@@ -149,7 +149,7 @@ def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflo
 
     ncols = 2
     nrows = ceil(len(tfidfs) / ncols)
-    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 3, nrows * 2.5))
+    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 3.2, nrows * 2.5))
     axes = axes.flatten()
     for decade, ax in zip(tfidfs.index, axes.flatten()):
         # Plot top phrases
