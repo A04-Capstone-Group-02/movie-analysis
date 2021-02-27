@@ -4,12 +4,18 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from pandarallel import pandarallel
-from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from sklearn.neighbors import NearestNeighbors
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from torch.utils.data import DataLoader
+from sentence_transformers import (
+    SentenceTransformer,
+    InputExample,
+    SentencesDataset,
+    losses,
+)
 from .plot_clusters import plot_all_clusters
 
 spacy_en = spacy.load("en_core_web_sm")
@@ -80,6 +86,53 @@ def dim_reduction(embs, num_workers, method="PCA"):
     dr_embs = dr.fit_transform(embs)
     np.save("model/clustering/dr_embs.npy", dr_embs, allow_pickle=False)
     return dr_embs
+
+
+def finetune_sbert(
+    model, df, rep_sents, train_size, sample_per_pair, train_batch_size
+):
+    """Finetune the Sentence-BERT."""
+    train = []
+    n_sampled = 0
+    cnts = [0, 0]  # [neg, pos]
+    max_label_size = train_size // 2
+    genres = df.genres.apply(set)
+
+    with tqdm(total=train_size, position=0) as pbar:
+        while n_sampled < train_size:
+            id1, id2 = np.random.randint(0, len(df), 2)
+            label = int(bool(set.intersection(genres[id1], genres[id2])))
+
+            if cnts[label] > max_label_size:
+                continue
+
+            sent_pairs = np.stack(
+                np.meshgrid(rep_sents[id1], rep_sents[id2])
+            ).T.reshape(-1, 2)
+            if len(sent_pairs) <= sample_per_pair:
+                samples = sent_pairs
+            else:
+                samples_idx = np.random.choice(
+                    sent_pairs.shape[0], sample_per_pair, replace=False
+                )
+                samples = sent_pairs[samples_idx]
+
+            inexp = lambda pair: InputExample(texts=list(pair), label=label)
+            samples = list(map(inexp, samples))
+            train.extend(samples)
+
+            n_sampled += len(samples)
+            cnts[label] += len(samples)
+            pbar.update(len(samples))
+
+        train_ds = SentencesDataset(train, model)
+        train_obj = (
+            DataLoader(train_ds, shuffle=True, batch_size=train_batch_size),
+            losses.ContrastiveLoss(model=model),
+        )
+        model.fit(train_objectives=[train_obj], epochs=1, warmup_steps=100)
+        os.makedirs("model/clustering/sbert")
+        model.save("model/clustering/sbert")
 
 
 def run_clustering(config):
