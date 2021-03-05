@@ -8,6 +8,7 @@
   "decade_end": 2014,
   "phrase_count_threshold": 10,
   "stop_words": ["black", "car", "city", "death", "family", "film", "friends", "house", "led", "life", "live", "long", "lost", "love", "money", "movie", "order", "police", "shot", "town"],
+  "compact": false,
   "n_bars": 7,
   "movie_name_overflow": 35,
   "dpi": 300,
