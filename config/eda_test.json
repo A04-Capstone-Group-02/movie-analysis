@@ -8,6 +8,7 @@
   "decade_end": 3000,
   "phrase_count_threshold": 2,
   "stop_words": ["film", "life"],
+  "compact": false,
   "n_bars": 7,
   "movie_name_overflow": 35,
   "dpi": 300,

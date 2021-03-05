@@ -136,51 +136,71 @@ def top_phrases_by_year_bar_chart_race(df, data_out, stop_words, n_bars, dpi, fp
     )
 
 
-def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflow, dpi, **kwargs):
+def top_phrases_by_decade_bar_chart(df, data_out, stop_words, movie_name_overflow, dpi, compact, **kwargs):
     """
     Save a Figure with a bar chart of the top phrases (ranked by tf-idf) for each decade.
-    Annotate each phrase with its corresponding highest-grossing movie within the decade.
+    If not compact, annotate each phrase with its corresponding highest-grossing movie within the decade.
     """
-    def format_movie_name(movie, movie_name_overflow):
-        name = movie['name'] if len(movie['name']) <= movie_name_overflow else movie['name'][:movie_name_overflow - 3].strip() + '...'
-        return f'{name} ({movie.year})'
+    if compact:
+        tfidfs = phrase_tfidfs_by_decade(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
-    tfidfs = phrase_tfidfs_by_decade(df, **kwargs).drop(columns=stop_words, errors='ignore')
+        ncols = 4
+        nrows = ceil(len(tfidfs) / ncols)
+        fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 2.1, nrows * 1.9), constrained_layout=True)
+        axes = axes.flatten()
+        for decade, ax in zip(tfidfs.index, axes.flatten()):
+            tfidfs.loc[decade].nlargest(10)[::-1].plot.barh(ax=ax)
+            ax.set_title(f'{decade}s', size=15, x=0)
+            ax.spines['top'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.tick_params(bottom=False, labelbottom=False)
+        for ax in axes[len(tfidfs):]:
+            ax.axis('off')
+        fig.savefig(f'{data_out}/top_phrases_by_decade_bar_chart_compact.png', dpi=dpi, bbox_inches='tight')
 
-    ncols = 2
-    nrows = ceil(len(tfidfs) / ncols)
-    fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 3.2, nrows * 2.5))
-    axes = axes.flatten()
-    for decade, ax in zip(tfidfs.index, axes.flatten()):
-        # Plot top phrases
-        phrases = tfidfs.loc[decade].nlargest(10)[::-1]
-        phrases.plot.barh(ax=ax)
+    else:
+        def format_movie_name(movie, movie_name_overflow):
+            name = movie['name'] if len(movie['name']) <= movie_name_overflow else movie['name'][:movie_name_overflow - 3].strip() + '...'
+            return f'{name} ({movie.year})'
 
-        # Annotate with corresponding movie names
-        df_decade = df.query(f'{decade} <= date.dt.year < {decade + 10}')
-        movie_names = [format_movie_name(highest_grossing_movie_containing_phrase(df_decade, phrase), movie_name_overflow)
-                       for phrase in phrases.index]
-        for rect, movie_name in zip(ax.patches, movie_names):
-            ax.annotate(
-                movie_name,
-                xy=(rect.get_width(), rect.get_y() + rect.get_height() / 2),
-                xytext=(5, 0),
-                textcoords="offset points",
-                size=7.5,
-                ha='left',
-                va='center',
-                style='italic'
-            )
+        tfidfs = phrase_tfidfs_by_decade(df, **kwargs).drop(columns=stop_words, errors='ignore')
 
-        ax.set(title=f'{decade}s', xlabel='tf-idf')
-        ax.spines['top'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.tick_params(bottom=False, labelbottom=False)
-    for ax in axes[len(tfidfs):]:
-        ax.axis('off')
-    fig.subplots_adjust(wspace=6)
-    fig.savefig(f'{data_out}/top_phrases_by_decade_bar_chart.png', dpi=dpi, bbox_inches='tight')
+        ncols = 2
+        nrows = ceil(len(tfidfs) / ncols)
+        fig, axes = plt.subplots(nrows, ncols, sharex=True, figsize=(ncols * 3.2, nrows * 2.5))
+        axes = axes.flatten()
+        for decade, ax in zip(tfidfs.index, axes.flatten()):
+            # Plot top phrases
+            phrases = tfidfs.loc[decade].nlargest(10)[::-1]
+            phrases.plot.barh(ax=ax)
+
+            # Annotate with corresponding movie names
+            df_decade = df.query(f'{decade} <= date.dt.year < {decade + 10}')
+            movie_names = [
+                format_movie_name(highest_grossing_movie_containing_phrase(df_decade, phrase), movie_name_overflow)
+                for phrase in phrases.index]
+            for rect, movie_name in zip(ax.patches, movie_names):
+                ax.annotate(
+                    movie_name,
+                    xy=(rect.get_width(), rect.get_y() + rect.get_height() / 2),
+                    xytext=(5, 0),
+                    textcoords="offset points",
+                    size=7.5,
+                    ha='left',
+                    va='center',
+                    style='italic'
+                )
+
+            ax.set(title=f'{decade}s', xlabel='tf-idf')
+            ax.spines['top'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.tick_params(bottom=False, labelbottom=False)
+        for ax in axes[len(tfidfs):]:
+            ax.axis('off')
+        fig.subplots_adjust(wspace=6)
+        fig.savefig(f'{data_out}/top_phrases_by_decade_bar_chart.png', dpi=dpi, bbox_inches='tight')
 
 
 def generate_figures(data_in, data_out, example_movie, **kwargs):
