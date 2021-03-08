@@ -70,11 +70,16 @@ The configuration file for this target is `eda.json` (or `eda_test.json` for `te
 
 - `data_in`: the path to the input data (relative to the root)
 - `data_out`: the path to the output directory (relative to the root)
+- `example_movie`: example movie to profile
 - `year_start`: the earliest year to analyze
 - `year_end`: the latest year to analyze
+- `decade_start`: the earliest decade to analyze
+- `decade_end`: the latest decade to analyze
 - `phrase_count_threshold`: the minimum count of a quality phrase to be included in the analysis
 - `stop_words`: the stop words to ignore in the analysis
+- `compact`: whether to output a full or compact visualization
 - `n_bars`: number of bars to display in the bar plots
+- `movie_name_overflow`: number of characters in visualization until ellipses
 - `dpi`: subplot dpi (dot per inches)
 - `fps`: fps (frame per second) of the bar chart race animation
 - `seconds_per_period`: the time each subplot will take in the bar chart race animation
