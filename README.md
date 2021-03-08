@@ -92,6 +92,8 @@ The configuration file for this target is `classification.json`, which contains 
 
 - `data`: the path to the input data (relative to the root)
 - `baseline`: a boolean indicator to specify running baseline (true-like) or parameter tuning (false-like)
+- `top_genre`: a number to specify the number of genres in the final output plot, default is 10 
+- `top_phrase`: a number of specify the number of words/phrases in the final output plot, default is 10
 
 ### `clustering` target
 
