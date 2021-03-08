@@ -1,4 +1,6 @@
 {
     "data":"data/out/data.pkl",
-    "baseline": 1
+    "baseline": 1,
+    "top_genre":10,
+    "top_phrase":10
 }
