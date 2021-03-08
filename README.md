@@ -97,7 +97,17 @@ The configuration file for this target is `clustering.json`, which contains the 
 - `clu_num_workers`: the number of workers to use
 - `clu_rep_sentences_path`: the path to the checkpoint representative sentences file (relative to the root), or an empty string `""` to disable the checkpoint
 - `clu_doc_embeddings_path`: the path to the checkpoint document embeddings file (relative to the root), or an empty string `""` to disable the checkpoint
-- `clu_dim_reduction`: the dimensionality reduction method to apply on the document embeddings, choose one from `{"PCA", "TSNE"}`
+- `clu_dim_reduction`: the dimensionality reduction method to apply on the document embeddings for visualization, choose one from `{"PCA", "TSNE"}`
+- `clu_sbert_base`: the sentence transformer model to use, can be either a pretrained model or a path to the saved model
+- `clu_sbert_finetune`: enable finetuning or not
+- `clu_sbert_finetune_config`: configurations for finetuning, will only be used if finetuning is enabled
+  - `train_size`: total number of training pairs to sample
+  - `sample_per_pair`: number of training pairs to sample per sampled document pair
+  - `train_batch_size`: batch size for training
+  - `epochs`: number of epochs to train
+- `clu_num_clusters`: number of clusters to generate
+- `clu_num_rep_features`: number of top representative features to store
+- `clu_rep_features_min_support`: the minimum support of a feature to be analyzed with summarizing the clusters
 
 ## Contributors
 
