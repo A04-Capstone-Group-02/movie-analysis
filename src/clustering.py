@@ -142,8 +142,12 @@ def calc_all_embeddings(df, model, cfg):
 def run_gmm(doc_embs, num_clusters=200):
     """Run gaussian mixture."""
     print(f"[clustering] running GMM...")
-    pca_embs = PCA(n_components=50).fit_transform(doc_embs)
-    gmm = GaussianMixture(n_components=num_clusters, verbose=2).fit(pca_embs)
+    if len(doc_embs) < 50:
+        pca_embs = doc_embs
+    else:
+        pca_embs = PCA(n_components=50).fit_transform(doc_embs)
+    n_comp = min([num_clusters, len(doc_embs)])
+    gmm = GaussianMixture(n_components=n_comp, verbose=2).fit(pca_embs)
     return gmm.predict(pca_embs)
 
 
