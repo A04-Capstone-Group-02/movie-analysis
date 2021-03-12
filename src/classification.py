@@ -94,14 +94,14 @@ def build(summary,genre, text_feature = 1, baseline = 1,top_genre = 10,top_phras
     fig.tight_layout()
     if text_feature:
         if baseline:
-            fig.savefig('baseline model with summary text results.png')
+            fig.savefig('data/figures/baseline model with summary text results.png')
         else:
-            fig.savefig('final model with summary text results.png')
+            fig.savefig('data/figures/final model with summary text results.png')
     else:
         if baseline:
-            fig.savefig('baseline model with phrases results.png')
+            fig.savefig('data/figures/baseline model with phrases results.png')
         else:
-            fig.savefig('final model with phrases results.png')
+            fig.savefig('data/figures/final model with phrases results.png')
     return (f1+"\n"+e1+"\n"+e2+"\n")
 
 def model(config):
